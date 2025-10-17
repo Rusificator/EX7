@@ -6,8 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextBtn = document.querySelector('.slider-next');
     const currentPage = document.querySelector('.current-page');
     const totalPages = document.querySelector('.total-pages');
+    const pagerDots = document.querySelector('.pager-dots');
     
-    let currentSlide = 0;
+    let currentPageIndex = 0;
     const slidesCount = slides.length;
     
     // Calculate slides per view based on screen width
@@ -27,23 +28,71 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.ceil(slidesCount / slidesPerView);
     }
     
+    // Calculate current slide position based on current page
+    function getCurrentSlide() {
+        const slidesPerView = getSlidesPerView();
+        return currentPageIndex * slidesPerView;
+    }
+    
+    // Create dots for desktop pager
+    function createDots() {
+        const totalPagesCount = calculateTotalPages();
+        pagerDots.innerHTML = '';
+        
+        for (let i = 0; i < totalPagesCount; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'dot';
+            dot.setAttribute('data-page', i);
+            dot.addEventListener('click', function() {
+                const page = parseInt(this.getAttribute('data-page'));
+                goToPage(page);
+            });
+            pagerDots.appendChild(dot);
+        }
+    }
+    
+    // Go to specific page
+    function goToPage(page) {
+        const totalPagesCount = calculateTotalPages();
+        
+        if (page < 0) {
+            currentPageIndex = 0;
+        } else if (page >= totalPagesCount) {
+            currentPageIndex = totalPagesCount - 1;
+        } else {
+            currentPageIndex = page;
+        }
+        
+        showSlide();
+    }
+    
     // Update pager and button states
     function updatePager() {
-        const slidesPerView = getSlidesPerView();
         const totalPagesCount = calculateTotalPages();
-        const currentPageNum = Math.floor(currentSlide / slidesPerView) + 1;
         
-        currentPage.textContent = currentPageNum;
+        // Update numeric pager
+        currentPage.textContent = currentPageIndex + 1;
         totalPages.textContent = totalPagesCount;
         
+        // Update dots pager
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, index) => {
+            if (index === currentPageIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+        
         // Update button states
-        prevBtn.disabled = currentSlide === 0;
-        nextBtn.disabled = currentSlide >= slidesCount - slidesPerView;
+        prevBtn.disabled = currentPageIndex === 0;
+        nextBtn.disabled = currentPageIndex === totalPagesCount - 1;
     }
     
     // Show current slide
     function showSlide() {
         const slidesPerView = getSlidesPerView();
+        const currentSlide = getCurrentSlide();
         const slideWidth = 100 / slidesPerView;
         const translateX = -currentSlide * slideWidth;
         
@@ -51,53 +100,40 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePager();
     }
     
-    // Next slide
-    function nextSlide() {
-        const slidesPerView = getSlidesPerView();
-        const maxSlide = slidesCount - slidesPerView;
-        
-        if (currentSlide < maxSlide) {
-            currentSlide += slidesPerView;
-            if (currentSlide > maxSlide) {
-                currentSlide = maxSlide;
-            }
-        }
-        showSlide();
+    // Next page
+    function nextPage() {
+        goToPage(currentPageIndex + 1);
     }
     
-    // Previous slide
-    function prevSlide() {
-        const slidesPerView = getSlidesPerView();
-        
-        if (currentSlide > 0) {
-            currentSlide -= slidesPerView;
-            if (currentSlide < 0) {
-                currentSlide = 0;
-            }
-        }
-        showSlide();
+    // Previous page
+    function prevPage() {
+        goToPage(currentPageIndex - 1);
     }
     
     // Event listeners
-    prevBtn.addEventListener('click', prevSlide);
-    nextBtn.addEventListener('click', nextSlide);
+    prevBtn.addEventListener('click', prevPage);
+    nextBtn.addEventListener('click', nextPage);
     
     // Handle window resize
     let resizeTimeout;
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(function() {
-            const slidesPerView = getSlidesPerView();
-            // Adjust current slide if it's out of bounds after resize
-            const maxSlide = slidesCount - slidesPerView;
-            if (currentSlide > maxSlide) {
-                currentSlide = maxSlide;
+            // Recreate dots if needed
+            createDots();
+            
+            // Adjust current page if it's out of bounds after resize
+            const totalPagesCount = calculateTotalPages();
+            if (currentPageIndex >= totalPagesCount) {
+                currentPageIndex = totalPagesCount - 1;
             }
+            
             showSlide();
         }, 250);
     });
     
     // Initialize
+    createDots();
     updatePager();
     showSlide();
 });
