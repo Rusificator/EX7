@@ -56,9 +56,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalPagesCount = calculateTotalPages();
         
         if (page < 0) {
-            currentPageIndex = 0;
+            currentPageIndex = totalPagesCount - 1; // Go to last page
         } else if (page >= totalPagesCount) {
-            currentPageIndex = totalPagesCount - 1;
+            currentPageIndex = 0; // Go to first page
         } else {
             currentPageIndex = page;
         }
@@ -84,9 +84,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Update button states
-        prevBtn.disabled = currentPageIndex === 0;
-        nextBtn.disabled = currentPageIndex === totalPagesCount - 1;
+        // For cyclic navigation, we don't disable buttons
+        // But we can add visual feedback if needed
+        prevBtn.classList.toggle('cyclic-prev', currentPageIndex === 0);
+        nextBtn.classList.toggle('cyclic-next', currentPageIndex === totalPagesCount - 1);
     }
     
     // Show current slide
@@ -100,13 +101,15 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePager();
     }
     
-    // Next page
+    // Next page with cyclic behavior
     function nextPage() {
+        const totalPagesCount = calculateTotalPages();
         goToPage(currentPageIndex + 1);
     }
     
-    // Previous page
+    // Previous page with cyclic behavior
     function prevPage() {
+        const totalPagesCount = calculateTotalPages();
         goToPage(currentPageIndex - 1);
     }
     
