@@ -301,15 +301,21 @@ map area {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.slider-arrow:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
+/* Visual feedback for cyclic navigation */
+.slider-arrow.cyclic-prev::after {
+    content: '↶';
+    position: absolute;
+    font-size: 0.7em;
+    bottom: -5px;
+    right: -5px;
 }
 
-.slider-arrow:disabled:hover {
-    transform: none;
-    box-shadow: none;
+.slider-arrow.cyclic-next::after {
+    content: '↷';
+    position: absolute;
+    font-size: 0.7em;
+    bottom: -5px;
+    left: -5px;
 }
 
 /* Адаптивность галереи */
